@@ -94,7 +94,70 @@ public class Server {
                         } else {
                             response = "FAILED OPERATION: ADD FRIEND. USER IS`NT EXISTS";
                         }
+                    } else if (Integer.parseInt(request.substring(0, 2)) == 3) {
+
+                        List<String> lines = Files.readAllLines(Paths.get
+                                (mainPath + request.substring(2) + ".txt"), StandardCharsets.UTF_8);
+
+                        String friends = "";
+
+                        for (int i = 0; i < lines.size(); i++) {
+
+                            String line = lines.get(i);
+
+                            if (line.startsWith("F:")) {
+                                friends = line.substring(2);
+                                break;
+                            }
+
+                        }
+
+                        friends = friends.replace(" ", "");
+
+                        for (int j = 0; j<friends.length(); j += 11) { // Friends loop
+
+                            //friends.substring(j, j+11);
+                            // Find friend`s file
+                            // Write request number
+                            if(Files.exists(Path.of(mainPath + friends.substring(j, j+11) + ".txt"))) {
+
+                                List<String> fileLines = Files.readAllLines(Paths.get
+                                        (mainPath + friends.substring(j, j+11) + ".txt"), StandardCharsets.UTF_8);
+
+                                List<String> toWrite = new ArrayList<>();
+                                for (int i = 0; i<fileLines.size(); i++) { // File loop
+
+                                    String fline = fileLines.get(i);
+
+                                    if (fline.startsWith("NA:")) {
+
+                                        System.out.println("Find Line");
+                                        String updated = fline.trim() + " " +  request.substring(2);
+                                        System.out.println(updated);
+                                        toWrite.add(updated);
+
+                                    } else {
+                                        toWrite.add(fline);
+                                    }
+                                }
+
+                                Files.write(
+                                        Paths.get(mainPath + friends.substring(j, j + 11) + ".txt"),
+                                        toWrite,
+                                        StandardCharsets.UTF_8,
+                                        StandardOpenOption.WRITE
+
+                                );
+
+
+
+
+
+                            }
+
                     }
+
+                    response = "SUCCESSFUL: NEED-ATTENTION-request";
 
 
 
@@ -102,17 +165,14 @@ public class Server {
                     writer.newLine();
                     writer.flush();
 
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+
+
                 }
             }
 
         }
     }
 
-    public void createFile(String path, String line) throws IOException {
-
-        Files.createFile(Path.of(path));
 
     }
 }
