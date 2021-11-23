@@ -70,7 +70,7 @@ public class Server {
 
                         if(Files.exists(Path.of(methodsExecutor.mainPath + request.substring(2, 13) + ".txt"))) {
 
-                            methodsExecutor.changeFile("F:", request.substring(2, 13),
+                            methodsExecutor.changeFile("F:",0, request.substring(2, 13),
                                     request.substring(13));
 
                             response = "SUCCESSFUL: ADD FRIEND";
@@ -85,7 +85,7 @@ public class Server {
 
                         for (int j = 0; j<friends.length(); j += 11) { // Friends loop
 
-                            methodsExecutor.changeFile("NA:", request.substring(2, 13),
+                            methodsExecutor.changeFile("NA:", 0,  request.substring(2, 13),
                                     friends.substring(j, j+11));
 
                         }
@@ -101,6 +101,9 @@ public class Server {
 
                             response = lineNA.replaceAll("(.{11})", "$1, ");
                             response = "1" + response.substring(0, response.length()-2);
+
+                            methodsExecutor.changeFile("NA:", 1, "", request.substring(13));
+
                             System.out.println(response);
 
                         } else {
@@ -133,7 +136,7 @@ public class Server {
         return path;
     }
 
-    private void changeFile(String beginOfLine, String forWrite, String fileTo) throws IOException {
+    private void changeFile(String beginOfLine, Integer task, String forWrite, String fileTo) throws IOException {
 
         // Arrays
         List<String> lines = Files.readAllLines(Paths.get
@@ -146,9 +149,14 @@ public class Server {
 
             String line = lines.get(i);
 
-            if (line.startsWith(beginOfLine)) {
+            if (line.startsWith(beginOfLine) & task == 0) {
 
-                String updated = line.trim() + " " +  forWrite;
+                String updated = line.trim() + " " + forWrite;
+                toWrite.add(updated);
+
+            } else if (line.startsWith(beginOfLine) & task == 1){
+
+                String updated = "NA: ";
                 toWrite.add(updated);
 
             } else {
