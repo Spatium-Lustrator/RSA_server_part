@@ -12,7 +12,8 @@ import java.util.List;
 
 public class Server {
 
-    String mainPath = "C:\\Users\\Toma\\IdeaProjects\\ServerApp\\Server\\src\\";
+    // Need change when work on another computer
+    String mainPath = "C:\\Users\\t.dmitrieva\\IdeaProjects\\ServerPart\\src\\";
 
     public static void main(String[] args) throws IOException {
 
@@ -49,17 +50,17 @@ public class Server {
 
                     if (Integer.parseInt(request.substring(0, 2)) == 1) { // Register request
 
-                        System.out.println("Begin of signing up");
-
                         Path path = methodsExecutor.createFile(request);
 
                         OutputStream fileOS = new FileOutputStream(String.valueOf(path), true);
-
-                        fileOS.write(request.substring(14).getBytes());
+                        String passwordLine = "P: " + request.substring(14);
+                        fileOS.write(passwordLine.getBytes());
                         fileOS.write("\r\n".getBytes());
                         fileOS.write("F: ".getBytes());
                         fileOS.write("\r\n".getBytes());
                         fileOS.write("NA: ".getBytes());
+                        //fileOS.write("\r\n".getBytes());  // For jsoup part
+                        //fileOS.write("NC: ".getBytes());
 
                         fileOS.close();
 
@@ -76,7 +77,7 @@ public class Server {
                             response = "SUCCESSFUL: ADD FRIEND";
 
                         } else {
-                            response = "FAILED OPERATION: ADD FRIEND. USER IS`NT EXISTS";
+                            response = "FAILED OPERATION: ADD FRIEND. USER ISN`T EXISTS";
                         }
 
                     } else if (Integer.parseInt(request.substring(0, 2)) == 3) { // NA-request
@@ -104,7 +105,6 @@ public class Server {
 
                             methodsExecutor.changeFile("NA:", 1, "", request.substring(13));
 
-                            System.out.println(response);
 
                         } else {
 
@@ -112,8 +112,68 @@ public class Server {
 
                         }
 
+                    } else if (Integer.parseInt(request.substring(0, 2)) == 5) {
+
+                        if(Files.exists(Path.of(methodsExecutor.mainPath + request.substring(2, 13) + ".txt"))) {
+
+                            String usersPassword = methodsExecutor.readFile(request.substring(2, 13), "P:");
+
+                            if (usersPassword.equals(request.substring(13))) {
+
+                                response = "SUCCESSFUL: SIN-request";
+
+                            } else {
+                                response = "ER02 FAILED: SIN-request";
+                            }
+                        } else {
+
+                            response = "ER01 FAILED: SIN-request";
+
+                        }
+
+
+                        // Big chance what this method is not useful, because of new algorithm
+//                    } else if (Integer.parseInt(request.substring(0, 2)) == 6) {    // Singer Request
+//
+//                        if (Files.exists(Path.of(methodsExecutor.mainPath + request.substring(2, 13) + ".txt"))) {
+//                            methodsExecutor.changeFile("NC:", 0, request.substring(13),
+//                                    request.substring(2, 13));
+//                            response = "SUCCESSFUL: SINGER-request";
+//                        } else {
+//                            response = "ER01 FAILED: SINGER-request";
+//                        }
+//
+//                    } else if (Integer.parseInt(request.substring(0, 2)) == 7) { // Want to concert request
+//
+//                        String friends = methodsExecutor.readFile(request.substring(13), "F:");
+//
+//                        for (int j = 0; j<friends.length(); j += 11) { // Friends loop
+//
+//                            methodsExecutor.changeFile("NC:", 0,  request.substring(2, 13),
+//                                    friends.substring(j, j+11));
+//
+//                        }
+
+//                    } else if (Integer.parseInt(request.substring(0, 2)) == 8) { // Check NC-string request
+//
+//                        String lineNC = methodsExecutor.readFile(request.substring(2, 13), "NC:");
+//
+//                        if (lineNC.length() > 3) {
+//
+//                            response = lineNC.replaceAll("(.{11})", "$1, ");
+//                            response = "1" + response.substring(0, response.length()-2);
+//
+//                            methodsExecutor.changeFile("NC:", 1, "", request.substring(13));
+//
+//                        } else {
+//
+//                            response = "Nobody want to visit concert";
+//
+//                        }
+
                     }
 
+                    System.out.println("Response: " + response);
                     writer.write(response);
                     writer.newLine();
                     writer.flush();
@@ -154,17 +214,26 @@ public class Server {
                 String updated = line.trim() + " " + forWrite;
                 toWrite.add(updated);
 
-            } else if (line.startsWith(beginOfLine) & task == 1){
 
-                String updated = "NA: ";
+            } else if (line.startsWith(beginOfLine) & task == 1){   // Clear string
+
+                String updated = beginOfLine;
                 toWrite.add(updated);
+
+
 
             } else {
                 toWrite.add(line);
+
             }
         }
 
+        File file = new File(mainPath + fileTo + ".txt");
+        if (file.exists()) {
 
+            file.delete();
+            file.createNewFile();
+        }
 
         Files.write(
                 Paths.get(mainPath + fileTo + ".txt"),
